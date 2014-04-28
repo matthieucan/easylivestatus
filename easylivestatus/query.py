@@ -86,8 +86,8 @@ class Query(object):
         self._check_type('Output format', val, str)
         self._output_format = val
         return self
-    
-    def to_json(self):
+
+    def to_dict(self):
         d = {'datasource': self._datasource,
              'columns': self._columns,
              'filters': self._filters,
@@ -98,14 +98,14 @@ class Query(object):
              'limit': self._limit,
              'output_format': self._output_format,
              }
+        return d
+    
+    def to_json(self):
+        d = self.to_dict()
         return json.dumps(d)
 
-    def from_json(self, content, already_json=False):
+    def from_dict(self, d):
         """ Warning: will override self attributes. """
-        if not already_json:
-            d = json.loads(content)
-        else:
-            d = content
         self._datasource = d.get('datasource', None)
         self._columns = d.get('columns', [])
         self._filters = d.get('filters', [])
@@ -115,7 +115,12 @@ class Query(object):
         self._column_headers = d.get('column_headers', False)
         self._limit = d.get('limit', None)
         self._output_format = d.get('output_format', None)
+        
         return self
+
+    def from_json(self, content):
+        d = json.loads(content)
+        return self.from_dict(d)
     
     def __repr__(self):
         # datasource
