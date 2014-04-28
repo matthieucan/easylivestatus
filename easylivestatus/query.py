@@ -112,7 +112,7 @@ class Query(object):
         self._stats = d.get('stats', [])
         self._sorts = d.get('sorts', [])
         self._groupby = d.get('groupby', [])
-        self.column_headers = d.get('column_headers', False)
+        self._column_headers = d.get('column_headers', False)
         self._limit = d.get('limit', None)
         self._output_format = d.get('output_format', None)
         return self
