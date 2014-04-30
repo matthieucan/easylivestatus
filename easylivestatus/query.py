@@ -27,10 +27,7 @@ from easylivestatus.components import Column, ColumnContainer, \
 
 class Query(object):
     def __init__(self, datasource=None):
-        if datasource is not None:
-            self._datasource = datasource
-        else:
-            self._datasource = 'hosts' # TODO: default?
+        self._datasource = datasource
         self._columns = ColumnContainer()
         self._filters = FilterContainer()
         self._stats = StatContainer()
@@ -115,7 +112,7 @@ class Query(object):
 
     def from_dict(self, d):
         """ Warning: will override self attributes. """
-        self._datasource = d.get('datasource', 'hosts') # TODO: default
+        self._datasource = d.get('datasource', None)
         self._columns = d.get('columns', [])
         self._filters = d.get('filters', [])
         self._stats = d.get('stats', [])
