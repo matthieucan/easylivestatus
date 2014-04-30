@@ -19,14 +19,23 @@
 
 import json
 
+from easylivestatus.components import Column, ColumnContainer, \
+     Filter, FilterContainer, \
+     Stat, StatContainer, \
+     Sort, SortContainer, \
+     Groupby, GroupbyContainer
+
 class Query(object):
     def __init__(self, datasource=None):
-        self._datasource = datasource
-        self._columns = []
-        self._filters = []
-        self._stats = []
-        self._sorts = []
-        self._groupby = []
+        if datasource is not None:
+            self._datasource = datasource
+        else:
+            self._datasource = 'hosts' # TODO: default?
+        self._columns = ColumnContainer()
+        self._filters = FilterContainer()
+        self._stats = StatContainer()
+        self._sorts = SortContainer()
+        self._groupby = GroupbyContainer()
         self._column_headers = False
         self._limit = None
         self._output_format = None
@@ -45,31 +54,31 @@ class Query(object):
     def columns(self, *args):
         for arg in args:
             self._check_type('Columns', arg, str)
-        self._columns.extend(args)
+        self._columns.extend([Column(x) for x in args])
         return self
     
     def filters(self, *args):
         for arg in args:
             self._check_type('Filters', arg, str)
-        self._filters.extend(args)
+        self._filters.extend([Filter(x) for x in args])
         return self
 
     def stats(self, *args):
         for arg in args:
             self._check_type('Stats', arg, str)
-        self._stats.extend(args)
+        self._stats.extend([Stat(x) for x in args])
         return self
 
     def sorts(self, *args):
         for arg in args:
             self._check_type('Sorts', arg, str)
-        self._sorts.extend(args)
+        self._sorts.extend([Sort(x) for x in args])
         return self
     
     def groupby(self, *args):
         for arg in args:
             self._check_type('Group by', arg, str)
-        self._groupby.extend(args)
+        self._groupby.extend([Groupby(x) for x in args])
         return self
 
     def column_headers(self, val):
@@ -89,11 +98,11 @@ class Query(object):
 
     def to_dict(self):
         d = {'datasource': self._datasource,
-             'columns': self._columns,
-             'filters': self._filters,
-             'stats': self._stats,
-             'sorts': self._sorts,
-             'groupby': self._groupby,
+             'columns': [x.to_dict() for x in self._columns],
+             'filters': [x.to_dict() for x in self._filters],
+             'stats': [x.to_dict() for x in self._stats],
+             'sorts': [x.to_dict() for x in self._sorts],
+             'groupby': [x.to_dict() for x in self._groupby],
              'column_headers': self._column_headers,
              'limit': self._limit,
              'output_format': self._output_format,
@@ -106,7 +115,7 @@ class Query(object):
 
     def from_dict(self, d):
         """ Warning: will override self attributes. """
-        self._datasource = d.get('datasource', None)
+        self._datasource = d.get('datasource', 'hosts') # TODO: default
         self._columns = d.get('columns', [])
         self._filters = d.get('filters', [])
         self._stats = d.get('stats', [])
@@ -127,21 +136,28 @@ class Query(object):
         q = 'GET {0}\n'.format(self._datasource)
         
         # columns
-        if self.columns:
-            columns = ' '.join(self._columns)
-            q += 'Columns: {0}\n'.format(columns)
-        
+        if self._columns:
+            q += str(self._columns)
+            
         # filters
-        for filt in self._filters:
-            q += 'Filter: {0}\n'.format(filt)
+        if self._filters:
+            q += str(self._filters)
 
         # stats
-        for stat in self._stats:
-            q += 'Stats: {0}\n'.format(stat)
+        if self._stats:
+            q += str(self._stats)
+        
+        # sorting
+        if self._sorts:
+            q += str(self._sorts)
+
+        # groupby
+        if self._groupby:
+            q += str(self._groupby)
 
         # column headers
         q += 'ColumnHeaders: {0}\n'.format(
-            {True: 'On', False: 'Off'}[self._column_headers])
+            {True: 'On', False: 'On'}[self._column_headers])
 
         # output format
         if self._output_format:
@@ -157,5 +173,19 @@ if __name__ == '__main__':
          .sorts('lklk', 'klkl')
          .groupby('qwe', 'rty')
          .column_headers(True)
+         .limit(42)
+         .output_format('json')
          )
-    print(q.to_json())
+    print q
+    from pprint import pprint
+    pprint(q.to_dict())
+    assert q.to_dict() == {'datasource': 'foo',
+                           'columns': ['foo', 'bar'],
+                           'filters': ['hey', 'ya'],
+                           'stats': ['ploum', 'abcd'],
+                           'sorts': ['lklk', 'klkl'],
+                           'groupby': ['qwe', 'rty'],
+                           'column_headers': True,
+                           'limit': 42,
+                           'output_format': 'json',
+                           }
