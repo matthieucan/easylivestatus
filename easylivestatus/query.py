@@ -26,6 +26,23 @@ from easylivestatus.components import Column, ColumnContainer, \
      Groupby, GroupbyContainer
 
 class Query(object):
+    """
+    Query is a wrapper around LiveStatus queries, and permits to
+    construct complex requests while only using Python's syntax.
+
+    >>> from easylivestatus.query import Query
+    >>> q = (Query('hosts')
+    ...      .columns('name', 'description')
+    ...      .filters('state = 1')
+    ...      .limit(42)
+    ...     )
+    >>> print(q)
+    GET hosts
+    Columns: name description
+    Filter: state = 1
+    ColumnHeaders: On
+    >>>
+    """
     def __init__(self, datasource=None):
         self._datasource = datasource
         self._columns = ColumnContainer()
