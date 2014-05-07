@@ -130,11 +130,11 @@ class Query(object):
     def from_dict(self, d):
         """ Warning: will override self attributes. """
         self._datasource = d.get('datasource', None)
-        self._columns = d.get('columns', [])
-        self._filters = d.get('filters', [])
-        self._stats = d.get('stats', [])
-        self._sorts = d.get('sorts', [])
-        self._groupby = d.get('groupby', [])
+        self._columns = ColumnContainer(d.get('columns', []))
+        self._filters = FilterContainer(d.get('filters', []))
+        self._stats = StatContainer(d.get('stats', []))
+        self._sorts = SortContainer(d.get('sorts', []))
+        self._groupby = GroupbyContainer(d.get('groupby', []))
         self._column_headers = d.get('column_headers', False)
         self._limit = d.get('limit', None)
         self._output_format = d.get('output_format', None)
