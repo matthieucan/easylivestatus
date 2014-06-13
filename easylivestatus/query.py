@@ -50,7 +50,7 @@ class Query(object):
         self._stats = StatContainer()
         self._sorts = SortContainer()
         self._groupby = GroupbyContainer()
-        self._column_headers = False
+        self._column_headers = None
         self._limit = None
         self._output_format = None
 
@@ -135,7 +135,7 @@ class Query(object):
         self._stats = StatContainer(d.get('stats', []))
         self._sorts = SortContainer(d.get('sorts', []))
         self._groupby = GroupbyContainer(d.get('groupby', []))
-        self._column_headers = d.get('column_headers', False)
+        self._column_headers = d.get('column_headers', None)
         self._limit = d.get('limit', None)
         self._output_format = d.get('output_format', None)
         
@@ -170,8 +170,9 @@ class Query(object):
             q += str(self._groupby)
 
         # column headers
-        q += 'ColumnHeaders: {0}\n'.format(
-            {True: 'On', False: 'On'}[self._column_headers])
+        if self._column_headers:
+            q += 'ColumnHeaders: {0}\n'.format(
+                {True: 'On', False: 'On'}[self._column_headers])
 
         # output format
         if self._output_format:
